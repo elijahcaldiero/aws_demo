@@ -18,7 +18,8 @@ resource "aws_launch_configuration" "test" {
               #!/bin/bash
 	      sudo yum -q -y install httpd git
               git clone https://github.com/elijahcaldiero/aws_demo.git
-              ln -s `pwd`/aws_demo/webapp /var/www/html
+              sudo ln -s /home/centos/aws_demo/webapp /var/www/html
+              sudo systemctl start httpd
               EOF
 
 lifecycle {
@@ -81,14 +82,14 @@ resource "aws_elb" "test" {
     instance_port = var.server_port
     instance_protocol = "http"
   }
-
-health_check {
-  healthy_threshold = 2
-  unhealthy_threshold = 2
-  timeout = 3
-  interval = 30
-  target = "HTTP:${var.server_port}/"
- }
+#
+#health_check {
+#  healthy_threshold = 1
+#  unhealthy_threshold = 600
+#  timeout = 2
+#  interval = 1
+#  target = "HTTP:${var.server_port}/"
+# }
 }
 
 resource "aws_security_group" "elb" {
@@ -109,16 +110,17 @@ resource "aws_security_group" "elb" {
   }
 }
 
-resource "aws_db_instance" "testdb"{
-  allocated_storage = 5
-  engine = "mysql"
-  engine_version = "5.7"
-  instance_class = "db.t2.micro"
-  name = "demodb"
-  username = "demouser"
-  password = random_string.dbpass.result
-}
-
-resource "random_string" "dbpass"{
-  length = 16
-}
+#resource "aws_db_instance" "testdb"{
+#  allocated_storage = 5
+#  engine = "mysql"
+#  engine_version = "5.7"
+#  instance_class = "db.t2.micro"
+#  name = "demodb"
+#  username = "demouser"
+#  password = random_string.dbpass.result
+#  skip_final_snapshot = true
+#}
+#
+#resource "random_string" "dbpass"{
+#  length = 16
+#}
