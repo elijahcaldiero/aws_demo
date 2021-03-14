@@ -1,24 +1,24 @@
 provider "aws" {
-  profile = "default" 
+  profile = "default"
   region = "us-east-2"
 }
 
 variable "server_port" {
 description = "The port the server will use for HTTP requests"
-default = 8080
+default = 80
 }
 
 
 resource "aws_launch_configuration" "test" {
-  image_id = "ami-04370661"
+  image_id = "ami-02ad6b83fd606d009"
   instance_type = "t2.micro"
   security_groups = [aws_security_group.instance.id]
 
-
   user_data = <<-EOF
               #!/bin/bash
-              echo "Hello World" > index.html
-              nohup busybox httpd -f -p var.server_port &
+	      sudo yum -q -y install httpd git
+              git clone https://github.com/elijahcaldiero/aws_demo.git
+              ln -s `pwd`/aws_demo/webapp /var/www/html
               EOF
 
 lifecycle {
@@ -36,6 +36,13 @@ resource "aws_security_group" "instance" {
     from_port = var.server_port
     to_port = var.server_port
     protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -93,7 +100,7 @@ resource "aws_security_group" "elb" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
- 
+
   egress {
     from_port = 0
     to_port = 0
@@ -115,4 +122,3 @@ resource "aws_db_instance" "testdb"{
 resource "random_string" "dbpass"{
   length = 16
 }
-
