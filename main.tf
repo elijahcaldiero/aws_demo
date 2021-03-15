@@ -18,7 +18,7 @@ resource "aws_launch_configuration" "test" {
   user_data = <<-EOF
               #!/bin/bash
               echo "Hello World" > index.html
-              nohup busybox httpd -f -p var.server_port &
+              nohup busybox httpd -f -p "${var.server_port}" &
               EOF
 
 lifecycle {
@@ -100,4 +100,15 @@ resource "aws_security_group" "elb" {
     protocol = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_db_instance" "testdb" {
+  allocated_storage = 5
+  engine = "mysql"
+  engine_version = "5.7"
+  instance_class = "db.t2.micro"
+  name = "testdb"
+  username = "dbdemo"
+  password = "12345678"
+  skip_final_snapshot = true
 }
